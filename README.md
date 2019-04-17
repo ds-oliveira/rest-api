@@ -29,9 +29,9 @@ Now we're going to initiate a new npm project by typing the following command, a
 npm init
 ```
 
-If we take a look at the directory, we can see a new file named package.json. This file will be responsible for the management of our project's dependencies.
+If we take a look at the directory, we can see a new file named `package.json`. This file will be responsible for the management of our project's dependencies.
 
-The next step is to create the project's folder structure. We're going to create the following structure:
+The next step is to create the project's folder structure:
 ```
 - Dockerfile
 - process.yml
@@ -85,21 +85,21 @@ Firstly, we're going to create our logger module, to log our application behavio
 ### `rest-api/commons/logger/index.js`
 
 ```
-// Getting the winston module
+// Getting the winston module.
 const winston = require('winston')
 
-// Creating a logger that will print the application`s behavior in the console
+// Creating a logger that will print the application`s behavior in the console.
 const logger = winston.createLogger({
   transports: [
     new winston.transports.Console()
   ]
 });
 
-// Exporting the logger object to be used as a module by all of the application
+// Exporting the logger object to be used as a module by the whole application.
 module.exports = logger
 ```
 
-Models can help you to identify what's the structure of an object you're working with dynamically typed languages, so let's create a model named User.
+Models can help you to identify what's the structure of an object when you're working with dynamically typed languages, so let's create a model named User.
 
 ### `rest-api/models/user/index.js`
 
@@ -115,7 +115,7 @@ const User = (id, name, email) => ({
 module.exports = User
 ```
 
-It's time to build our service module, with its methods!
+It's time to build our service module with its methods!
 
 ### `rest-api/services/user/index.js`
 
@@ -316,7 +316,7 @@ curl -X DELETE localhost:3000/user/2
 ```
 
 ## Configuring and Running the PM2
-Since everything worked fine, it's time to configure a PM2 service in our application. For this, we'll need to go to a file we created on the start of this tutorial `rest-api/process.yml` and implement the following configuration structure:
+Since everything worked fine, it's time to configure a PM2 service in our application. To do this, we'll need to go to a file we created on the start of this tutorial `rest-api/process.yml` and implement the following configuration structure:
 ```
 apps:
   - script: rest-api.js             # Application's startup file name
@@ -341,7 +341,7 @@ curl -X PUT localhost:3000/user -d '{"id":2, "name":"Danilo Oliveira", "email": 
 curl -X DELETE localhost:3000/user/2
 ```
 
-In the `Terminal 1` you should see by the logs, your request being balanced through the multiple instances of our application, the numbers on the start of each row are the instances ids:
+In the `Terminal 1` you should see by the logs your requests being balanced through the multiple instances of our application, the numbers on the start of each row are the instances ids:
 ```
 2|rest-api  | {"message":"User Updated","level":"info"}
 3|rest-api  | {"message":"User Updated","level":"info"}

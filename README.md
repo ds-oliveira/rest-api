@@ -1,4 +1,4 @@
-# Building a Rest API using Node.js, PM2 and Docker
+# Building a Rest API using Node.js, PM2, and Docker
 
 Hello guys, this is a beginner level hands-on tutorial but is extremely recommended that you already had contact with javascript or some interpreted language with dynamic typing.
 
@@ -13,7 +13,7 @@ Hello guys, this is a beginner level hands-on tutorial but is extremely recommen
 - npm version 6 or later - the Node.js installation already solves the npm dependency
 - Docker 2.0 or later - https://www.docker.com/get-started
  
-### Okay, so let's start! 
+## Building the project's folder structure and installing the project's dependencies
 
 WARNING: 
 This tutorial was built using MacOs. Some things can diverge in other operational systems.
@@ -99,7 +99,7 @@ const logger = winston.createLogger({
 module.exports = logger
 ```
 
-Models can help you to identify what's the structure of an object you're working with in dynamic typed languages, so let's create a model named User.
+Models can help you to identify what's the structure of an object you're working with dynamically typed languages, so let's create a model named User.
 
 ### `rest-api/models/user/index.js`
 
@@ -182,13 +182,14 @@ const logger = require('../../commons/logger')
 const User = require('../../models/user')
 
 // Handlers are responsible for managing the request and response objects, and link them to a service module that will do the hard work.
-// Each of the following handlers have the req and res parameters, which stands for request and response. 
-// Each one represent an HTTP verb (GET, POST, PUT and DELETE) that will be linked to them in the future.
+// Each of the following handlers has the req and res parameters, which stands for request and response. 
+// Each handler of this module represents an HTTP verb (GET, POST, PUT and DELETE) that will be linked to them in the future through a router.
 
 // GET
 const getUserById = (req, res) => {
   try {
     const users = userService.getUserById(parseInt(req.params.id))
+    logger.info('User Retrieved')
     res.send(users)
   } catch (err) {
     logger.error(err.message)
@@ -201,6 +202,7 @@ const insertUser = (req, res) => {
   try {
     const user = User(req.body.id, req.body.name, req.body.email)
     const users = userService.insertUser(user)
+    logger.info('User Inserted')
     res.send(users)
   } catch (err) {
     logger.error(err.message)
@@ -213,6 +215,7 @@ const updateUser = (req, res) => {
   try {
     const user = User(req.body.id, req.body.name, req.body.email)
     const users = userService.updateUser(user)
+    logger.info('User Updated')
     res.send(users)
   } catch (err) {
     logger.error(err.message)
@@ -224,6 +227,7 @@ const updateUser = (req, res) => {
 const deleteUserById = (req, res) => {
   try {
     const users = userService.deleteUserById(parseInt(req.params.id))
+    logger.info('User Deleted')
     res.send(users)
   } catch (err) {
     logger.error(err.message)
@@ -292,10 +296,58 @@ app.use(router)
 app.listen(restApiPort, () => {
   logger.info(`API Listening on port: ${restApiPort}`)
 })
+```
 
-// Request Examples with curl
-// curl localhost:3000/user/1
-// curl -X POST localhost:3000/user -d '{"id":5, "name":"Danilo Oliveira", "email": "danilo.oliveira@email.com"}' -H "Content-Type: application/json"
-// curl -X PUT localhost:3000/user -d '{"id":2, "name":"Danilo Oliveira", "email": "danilo.oliveira@email.com"}' -H "Content-Type: application/json"
-// curl -X DELETE localhost:3000/user/2
+## Running our application
+Inside the directory `rest-api/` type the following code to run our application:
+```
+node rest-api.js
+```
+You should see a message like the following in your terminal window:
+
+`{"message":"API Listening on port: 3000","level":"info"}`
+
+The message above means that our Rest API is running, so let's open another terminal and make some test calls with curl:
+```
+curl localhost:3000/user/1
+curl -X POST localhost:3000/user -d '{"id":5, "name":"Danilo Oliveira", "email": "danilo.oliveira@email.com"}' -H "Content-Type: application/json"
+curl -X PUT localhost:3000/user -d '{"id":2, "name":"Danilo Oliveira", "email": "danilo.oliveira@email.com"}' -H "Content-Type: application/json"
+curl -X DELETE localhost:3000/user/2
+```
+
+## Configuring and Running the PM2
+Since everything worked fine, it's time to configure a PM2 service in our application. For this, we'll need to go to a file we created on the start of this tutorial `rest-api/process.yml` and implement the following configuration structure:
+```
+apps:
+  - script: rest-api.js             # Application's startup file name
+    instances: 4                    # Number of processes that must run in parallel, you can change this if you want
+    exec_mode: cluster              # Execution mode
+```
+
+Now, we're going to turn on our PM2 service, make sure that our Rest API isn't running anywhere before execute the following command, cause we need the port 3000 free.
+```
+pm2 start process.yml
+```
+You should see a table showing some instances with `App Name = rest-api` and `status = online`, if so, it's time to test our load balancing. To make this test we're going to type the following command and open another terminal to make some requests:
+### `Terminal 1`
+```
+pm2 logs
+```
+### `Terminal 2`
+```
+curl localhost:3000/user/1
+curl -X POST localhost:3000/user -d '{"id":5, "name":"Danilo Oliveira", "email": "danilo.oliveira@email.com"}' -H "Content-Type: application/json"
+curl -X PUT localhost:3000/user -d '{"id":2, "name":"Danilo Oliveira", "email": "danilo.oliveira@email.com"}' -H "Content-Type: application/json"
+curl -X DELETE localhost:3000/user/2
+```
+
+In the `Terminal 1` you should see by the logs, your request being balanced through the multiple instances of our application, the numbers on the start of each row are the instances ids:
+```
+2|rest-api  | {"message":"User Updated","level":"info"}
+3|rest-api  | {"message":"User Updated","level":"info"}
+0|rest-api  | {"message":"User Updated","level":"info"}
+1|rest-api  | {"message":"User Updated","level":"info"}
+2|rest-api  | {"message":"User Deleted","level":"info"}
+3|rest-api  | {"message":"User Inserted","level":"info"}
+0|rest-api  | {"message":"User Retrieved","level":"info"}
 ```

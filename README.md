@@ -393,6 +393,11 @@ curl -X PUT localhost:3000/user -d '{"id":2, "name":"Danilo Oliveira", "email": 
 curl -X DELETE localhost:3000/user/2
 ```
 
-That's all folks, I hope you enjoy this tutorial. 
+As happened before, in the `Terminal 1` you should see by the logs your requests being balanced through the multiple instances of our application, but this time these instances are running inside a docker container.
 
-Please let me know if you have some doubt.
+## Conclusion
+Node.js with PM2 is a powerful tool, this combination can be used in many situations as workers, APIs and other kinds of applications. Adding docker containers to the equation, it can be a great cost reducer and performance improver for your stack.
+
+That's all folks! I hope you enjoyed this tutorial and please let me know if you have some doubt.
+
+See you!

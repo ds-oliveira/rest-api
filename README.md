@@ -282,7 +282,7 @@ const logger = require('./commons/logger')
 // Importing our router object
 const router = require('./routes')
 
-// Port that will receive the requests
+// The port that will receive the requests
 const restApiPort = 3000
 
 // Initializing the Express framework
@@ -351,3 +351,48 @@ In the `Terminal 1` you should see by the logs your requests being balanced thro
 3|rest-api  | {"message":"User Inserted","level":"info"}
 0|rest-api  | {"message":"User Retrieved","level":"info"}
 ```
+
+## Using Docker
+First, we need to implement the Dockerfile of our application:
+
+### `rest-api/rest-api.js`
+
+```
+# Base image
+FROM node:slim
+
+# Creating a directory inside the base image and defining as the base directory
+WORKDIR /app
+
+# Copying the files of the root directory into the base directory
+ADD . /app
+
+# Installing the pm2 dependency
+RUN npm install pm2 -g
+
+# Starting the pm2 process and keeping the docker container alive
+CMD pm2 start process.yml && tail -f /dev/null
+
+# Exposing the RestAPI port
+EXPOSE 3000
+```
+
+Finally, let's build our image and run our application within docker, we also need to map the application's port to a port in our machine and test it:
+### `Terminal 1`
+```
+docker image build . --tag rest-api/local:latest
+docker run -p 3000:3000 -d rest-api/local:latest
+docker exec -it {containerId returned by the previous command} bash
+pm2 logs
+```
+### `Terminal 2`
+```
+curl localhost:3000/user/1
+curl -X POST localhost:3000/user -d '{"id":5, "name":"Danilo Oliveira", "email": "danilo.oliveira@email.com"}' -H "Content-Type: application/json"
+curl -X PUT localhost:3000/user -d '{"id":2, "name":"Danilo Oliveira", "email": "danilo.oliveira@email.com"}' -H "Content-Type: application/json"
+curl -X DELETE localhost:3000/user/2
+```
+
+That's all folks, I hope you enjoy this tutorial. 
+
+Please let me know if you have some doubt.

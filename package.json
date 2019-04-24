@@ -2,7 +2,7 @@
   "name": "rest-api",
   "version": "1.0.0",
   "description": "Hello guys, this is a beginner level hands-on tutorial but is extremely recommended that you already had contact with javascript or some interpreted language with dynamic typing.",
-  "main": "index.js",
+  "main": "rest-api.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

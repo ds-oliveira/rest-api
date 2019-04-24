@@ -351,6 +351,10 @@ In the `Terminal 1` you should see by the logs your requests being balanced thro
 3|rest-api  | {"message":"User Inserted","level":"info"}
 0|rest-api  | {"message":"User Retrieved","level":"info"}
 ```
+Since we already tested our PM2 service, let's remove our instances to free the port 3000:
+```
+pm2 delete rest-api
+```
 
 ## Using Docker
 First, we need to implement the Dockerfile of our application:

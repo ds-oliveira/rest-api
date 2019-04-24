@@ -1,0 +1,4 @@
+apps:
+  - script: rest-api.js             # Application's startup file name
+    instances: 4                    # Number of processes that must run in parallel, you can change this if you want
+    exec_mode: cluster              # Execution mode

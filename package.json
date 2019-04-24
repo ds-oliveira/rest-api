@@ -1,0 +1,24 @@
+{
+  "name": "rest-api",
+  "version": "1.0.0",
+  "description": "Hello guys, this is a beginner level hands-on tutorial but is extremely recommended that you already had contact with javascript or some interpreted language with dynamic typing.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ds-oliveira/rest-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ds-oliveira/rest-api/issues"
+  },
+  "homepage": "https://github.com/ds-oliveira/rest-api#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "winston": "^3.2.1"
+  }
+}

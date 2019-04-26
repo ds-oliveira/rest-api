@@ -1,5 +1,6 @@
 // Importing some modules that we created before.
 const userService = require('../../services/user')
+const repository = require('../../repository/user-mock-repository')
 const logger = require('../../commons/logger')
 const User = require('../../models/user')
 
@@ -10,7 +11,7 @@ const User = require('../../models/user')
 // GET
 const getUserById = (req, res) => {
   try {
-    const users = userService.getUserById(parseInt(req.params.id))
+    const users = userService.getUserById(repository, parseInt(req.params.id))
     logger.info('User Retrieved')
     res.send(users)
   } catch (err) {
@@ -23,7 +24,7 @@ const getUserById = (req, res) => {
 const insertUser = (req, res) => {
   try {
     const user = User(req.body.id, req.body.name, req.body.email)
-    const users = userService.insertUser(user)
+    const users = userService.insertUser(repository, user)
     logger.info('User Inserted')
     res.send(users)
   } catch (err) {
@@ -36,7 +37,7 @@ const insertUser = (req, res) => {
 const updateUser = (req, res) => {
   try {
     const user = User(req.body.id, req.body.name, req.body.email)
-    const users = userService.updateUser(user)
+    const users = userService.updateUser(repository, user)
     logger.info('User Updated')
     res.send(users)
   } catch (err) {
@@ -48,7 +49,7 @@ const updateUser = (req, res) => {
 // DELETE
 const deleteUserById = (req, res) => {
   try {
-    const users = userService.deleteUserById(parseInt(req.params.id))
+    const users = userService.deleteUserById(repository, parseInt(req.params.id))
     logger.info('User Deleted')
     res.send(users)
   } catch (err) {

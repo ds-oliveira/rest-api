@@ -36,6 +36,9 @@ The next step is to create the project's folder structure:
 - Dockerfile
 - process.yml
 - rest-api.js
+- repository
+  - user-mock-repository
+    - index.js
 - routes
   - index.js
 - handlers
@@ -57,6 +60,7 @@ We can do it easily by copying and pasting the following commands:
 mkdir routes
 mkdir -p handlers/user
 mkdir -p services/user
+mkdir -p repository/user-mock-repository
 mkdir -p models/user
 mkdir -p commons/logger
 touch Dockerfile
@@ -65,6 +69,7 @@ touch rest-api.js
 touch routes/index.js
 touch handlers/user/index.js
 touch services/user/index.js
+touch repository/user-mock-repository/index.js
 touch models/user/index.js
 touch commons/logger/index.js
 ```
@@ -115,9 +120,9 @@ const User = (id, name, email) => ({
 module.exports = User
 ```
 
-It's time to build our service module with its methods!
+Now let's create a fake repository that will be responsible for our users.
 
-### `rest-api/services/user/index.js`
+### `rest-api/repository/user-mock-repository/index.js`
 
 ```
 // Importing the User model factory method.
@@ -130,17 +135,31 @@ const mockedUserList = [
   User(3, 'Phill Damon', 'phill.damon@email.com')
 ]
 
+// Creating a method that returns the mockedUserList.
+const getUsers = () => mockedUserList
+
+// Exporting the methods of the repository module.
+module.exports = {
+  getUsers
+}
+```
+
+It's time to build our service module with its methods!
+
+### `rest-api/services/user/index.js`
+
+```
 // Method that returns if an Id is higher than other Id.
 const sortById = (x, y) => x.id > y.id
 
 // Method that returns a list of users that match an specific Id.
-const getUserById = (id) => mockedUserList.filter(user => user.id === id).sort(sortById)
+const getUserById = (repository, id) => repository.getUsers().filter(user => user.id === id).sort(sortById)
 
 // Method that adds a new user to the fake list and returns the updated fake list, note that there isn't any persistence,
 // so the data returned by future calls to this method will always be the same.
-const insertUser = (newUser) => {
+const insertUser = (repository, newUser) => {
   const usersList = [
-    ...mockedUserList,
+    ...repository.getUsers(),
     newUser
   ]
 
@@ -149,9 +168,9 @@ const insertUser = (newUser) => {
 
 // Method that updates an existent user of the fake list and returns the updated fake list, note that there isn't any persistence,
 // so the data returned by future calls to this method will always be the same.
-const updateUser = (userToBeUpdated) => {
+const updateUser = (repository, userToBeUpdated) => {
   const usersList = [
-    ...mockedUserList.filter(user => user.id !== userToBeUpdated.id),
+    ...repository.getUsers().filter(user => user.id !== userToBeUpdated.id),
     userToBeUpdated
   ]
 
@@ -160,7 +179,7 @@ const updateUser = (userToBeUpdated) => {
 
 // Method that removes an existent user from the fake list and returns the updated fake list, note that there isn't any persistence,
 // so the data returned by future calls to this method will always be the same.
-const deleteUserById = (id) => mockedUserList.filter(user => user.id !== id).sort(sortById)
+const deleteUserById = (repository, id) => repository.getUsers().filter(user => user.id !== id).sort(sortById)
 
 // Exporting the methods of the service module.
 module.exports = {
@@ -178,6 +197,7 @@ Let's create our request handlers.
 ```
 // Importing some modules that we created before.
 const userService = require('../../services/user')
+const repository = require('../../repository/user-mock-repository')
 const logger = require('../../commons/logger')
 const User = require('../../models/user')
 
@@ -188,7 +208,7 @@ const User = require('../../models/user')
 // GET
 const getUserById = (req, res) => {
   try {
-    const users = userService.getUserById(parseInt(req.params.id))
+    const users = userService.getUserById(repository, parseInt(req.params.id))
     logger.info('User Retrieved')
     res.send(users)
   } catch (err) {
@@ -201,7 +221,7 @@ const getUserById = (req, res) => {
 const insertUser = (req, res) => {
   try {
     const user = User(req.body.id, req.body.name, req.body.email)
-    const users = userService.insertUser(user)
+    const users = userService.insertUser(repository, user)
     logger.info('User Inserted')
     res.send(users)
   } catch (err) {
@@ -214,7 +234,7 @@ const insertUser = (req, res) => {
 const updateUser = (req, res) => {
   try {
     const user = User(req.body.id, req.body.name, req.body.email)
-    const users = userService.updateUser(user)
+    const users = userService.updateUser(repository, user)
     logger.info('User Updated')
     res.send(users)
   } catch (err) {
@@ -226,7 +246,7 @@ const updateUser = (req, res) => {
 // DELETE
 const deleteUserById = (req, res) => {
   try {
-    const users = userService.deleteUserById(parseInt(req.params.id))
+    const users = userService.deleteUserById(repository, parseInt(req.params.id))
     logger.info('User Deleted')
     res.send(users)
   } catch (err) {
@@ -241,7 +261,7 @@ module.exports = {
   insertUser,
   updateUser,
   deleteUserById
-} 
+}
 ```
 
 Now, we're going to set up our HTTP routes.

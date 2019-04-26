@@ -7,8 +7,9 @@ WORKDIR /app
 # Copying the files of the root directory into the base directory
 ADD . /app
 
-# Installing the pm2 dependency
-RUN npm install pm2 -g
+# Installing the project dependencies
+RUN npm install
+RUN npm install pm2@3.5.0 -g
 
 # Starting the pm2 process and keeping the docker container alive
 CMD pm2 start process.yml && tail -f /dev/null
